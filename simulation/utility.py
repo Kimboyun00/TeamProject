@@ -39,7 +39,7 @@ def order_target_amount(account: Account, dt: datetime.date,
     positions = {asset_position.ticker: asset_position.position
                  for asset_position in account.portfolio.values()}
     # 자산의 보유 수량
-    position = position.get(ticker, 0)
+    position = positions.get(ticker, 0)
     # 거래 수량 계산
     amount = target_amount - position
     if amount != 0:
@@ -69,13 +69,13 @@ def order_target_percent(account: Account, dt: datetime, ticker: str,
     target_amount = calculate_target_amount(account = account, ticker = ticker,
                                             target_percent = target_percent, data = data)
     # 목표 수량에 따라 주문
-    return order_target_percent(account = account, dt = dt, ticker = ticker,
+    return order_target_amount(account = account, dt = dt, ticker = ticker,
                                 target_amount = target_amount)
 
 # 투자 포트폴리오 조정
 
 def rebalance(dt: datetime.date, data:pd.DataFrame, account: Account, weights:Dict):
-    for asset_position in account.portfoliio.valuse():
+    for asset_position in account.portfolio.values():
         if asset_position.ticker not in weights.keys():
             order = order_target_percent(account=account, dt=dt,
                                          ticker=asset_position.ticker,

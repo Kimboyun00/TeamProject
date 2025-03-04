@@ -24,8 +24,9 @@ class Account(object):
         self.transaction_history: List[Dict] = []
         self.portfolio_history: List[Dict] = []
         self.account_history: List[Dict] = []
+
         self.order_history: List[Dict] = []
-        self.weight_asset: List[Dict] = initial_cash
+        self.weight_asset: List[Dict] = []
 
     @property
     def total_asset(self) -> float:
@@ -39,7 +40,7 @@ class Account(object):
     # update_position() 메서드
     # 거래가 발생했을 때 계좌를 업데이트 하기 위한 용도로 투자 포트폴리오 내 자산 포지션, 현재 현금, 거래 히스토리를 업데이트
 
-    def update_position(self, transactions: Transaction):
+    def update_position(self, transactions: List[Transaction]):
         for tran in transactions:
             asset_exists = tran.ticker in self.portfolio.keys()
             if asset_exists:
@@ -49,14 +50,13 @@ class Account(object):
                 # 처음 보유하는 자산 추가
                 new_position = AssetPosition(
                     ticker=tran.ticker, position=tran.direction.value*tran.amount,
-                    latest_price=tran.price,
-                    cost=abs(tran.settlement_value)/tran.amount
+                    latest_price=tran.price, cost=abs(tran.settlement_value)/tran.amount
                 )
                 self.portfolio[tran.ticker] =new_position
             # 현재 현금 업데이트
             self.current_cash += tran.settlement_value
             # 거래 히스토리 업데이트
-            self.settlement_history.append(vars(tran))
+            self.transaction_history.append(vars(tran))
 
         # 투자 포트폴리오 업데이트
     # update_portfolio() 메서드
