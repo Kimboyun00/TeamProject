@@ -82,14 +82,14 @@ class PykrxDataLoader:
         return data
 
     # 주가 데이터 불러오기
-    def load_stock_data(self, ticker_list: List, freq: str, delay: float = 1):
+    def load_stock_data(self, ticker_list: List, freq: str, adjusted: bool = False ,delay: float = 1):
         ticker_data_list = []
         for ticker in ticker_list:
             ticker_data = stock.get_market_ohlcv(fromdate=self.fromdate,
                                                  todate=self.todate,
                                                  ticker=ticker,
                                                  freq='d',
-                                                 adjusted=True)
+                                                 adjusted=adjusted)
             ticker_data = ticker_data.rename(
                 columns={'시가': 'open', '고가': 'high', '저가': 'low',
                          '종가': 'close', '거래량': 'volume',
@@ -177,4 +177,3 @@ class PykrxDataLoader:
         )
 
         return data
-    
