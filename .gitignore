@@ -1,4 +1,21 @@
+data/
+csv/
+OT/
+test_csv/
+강의자료/
+학습 보조자료/
+학습보조자료/
+프로젝트일지/
+.csv
+.env
 .DS_Store
 ._.DS_Store
 **/.DS_Store
 **/._.DS_Store
+*.csv
+crime_list
+*crime_list
+*.zip
+*.xlsx
+*.txt
+*.html

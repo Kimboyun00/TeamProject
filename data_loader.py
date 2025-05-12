@@ -31,13 +31,13 @@ class PykrxDataLoader:
                                                todate=self.todate,
                                                ticker=ticker, freq=freq)
             ticker_data = ticker_data.rename(
-                columns={'시가총액': 'market_cap',
-                         '거래량': 'volume',
-                         '거래대금': 'trading_value',
-                         '상장주식수': 'shares'}
+                columns={'시가총액': 'Market_cap',
+                         '거래량': 'Volume',
+                         '거래대금': 'Trading_value',
+                         '상장주식수': 'Shares'}
             )
             ticker_data = ticker_data.assign(ticker=ticker)
-            ticker_data.index.name = 'date'
+            ticker_data.index.name = 'Date'
             ticker_data_list.append(ticker_data)
             time.sleep(delay)
         data = pd.concat(ticker_data_list)
@@ -53,7 +53,7 @@ class PykrxDataLoader:
                 fromdate=self.fromdate, todate=self.todate,
                 ticker=ticker, freq=freq)
             ticker_data = ticker_data.assign(ticker=ticker)
-            ticker_data.index.name = 'date'
+            ticker_data.index.name = 'Date'
             ticker_data_list.append(ticker_data)
             time.sleep(delay)
         data = pd.concat(ticker_data_list)
@@ -70,11 +70,11 @@ class PykrxDataLoader:
                 todate=self.todate,
                 ticker=ticker, freq=freq)
             ticker_data = ticker_data.rename(
-                columns={'기관합계': 'institutional', '외국인합계': 'foreign',
-                         '기타법인': 'other', '개인': 'individual', '전체': 'total'}
+                columns={'기관합계': 'Institutional', '외국인합계': 'Foreign',
+                         '기타법인': 'Other', '개인': 'Individual', '전체': 'Total'}
             )
             ticker_data = ticker_data.assign(ticker=ticker)
-            ticker_data.index.name = 'date'
+            ticker_data.index.name = 'Date'
             ticker_data_list.append(ticker_data)
             time.sleep(delay)
         data = pd.concat(ticker_data_list)
@@ -91,27 +91,27 @@ class PykrxDataLoader:
                                                  freq='d',
                                                  adjusted=adjusted)
             ticker_data = ticker_data.rename(
-                columns={'시가': 'open', '고가': 'high', '저가': 'low',
-                         '종가': 'close', '거래량': 'volume',
-                         '거래대금': 'trading_value', '등락률': 'change_pct'}
+                columns={'시가': 'Open', '고가': 'High', '저가': 'Low',
+                         '종가': 'Close', '거래량': 'Volume',
+                         '거래대금': 'Trading_value', '등락률': 'Change_pct'}
             )
             ticker_data = ticker_data.assign(ticker=ticker)
-            ticker_data.index.name = 'date'
+            ticker_data.index.name = 'Date'
             ticker_data_list.append(ticker_data)
             time.sleep(delay)
         data = pd.concat(ticker_data_list)
         # 잠시 거래를 중단한 주식의 시가, 고가, 저가 보충
-        data.loc[data.open == 0,
-                 ['open', 'high', 'low']] = data.loc[data.open == 0, 'close']
+        data.loc[data.Open == 0,
+                 ['Open', 'High', 'Low']] = data.loc[data.Open == 0, 'Close']
         # 샘플링을 통해 일 데이터를 다른 주기 데이터로 변환
         if freq != 'd':
             rule = {
-                'open': 'first',
-                'high': 'max',
-                'low': 'min',
-                'close': 'last',
-                'volume': 'sum',
-                # 'trading_value': 'sum',
+                'Open': 'first',
+                'High': 'max',
+                'Low': 'min',
+                'Close': 'last',
+                'Volume': 'sum',
+                # 'Trading_value': 'sum',
             }
             data = data.groupby('ticker').resample(freq).apply(rule).reset_index(level=0)
         data.__setattr__('frequency', freq)
@@ -126,12 +126,12 @@ class PykrxDataLoader:
                                                       ticker=ticker,
                                                       freq=freq)
             ticker_data = ticker_data.rename(
-                columns={'NAV': 'nav', '시가': 'open', '고가': 'high', '저가': 'low',
-                         '종가': 'close', '거래량': 'volume', '거래대금': 'trading_value',
-                         '기초지수': 'benchmark'}
+                columns={'NAV': 'Nav', '시가': 'Open', '고가': 'High', '저가': 'Low',
+                         '종가': 'Close', '거래량': 'Volume', '거래대금': 'Trading_value',
+                         '기초지수': 'Benchmark'}
             )
             ticker_data = ticker_data.assign(ticker=ticker)
-            ticker_data.index.name = 'date'
+            ticker_data.index.name = 'Date'
             ticker_data_list.append(ticker_data)
             time.sleep(delay)
         data = pd.concat(ticker_data_list)
@@ -147,12 +147,12 @@ class PykrxDataLoader:
                                                 ticker=ticker,
                                                 freq=freq)
             ticker_data = ticker_data.rename(
-                columns={'날짜': 'date', '시가': 'open', '고가': 'high', '저가': 'low',
-                         '종가': 'close', '거래량': 'volume', '거래대금': 'trading_value',
-                         '등락률': 'change_pct', '상장시가총액': 'market_cap'}
+                columns={'날짜': 'Date', '시가': 'Open', '고가': 'High', '저가': 'Low',
+                         '종가': 'Close', '거래량': 'Volume', '거래대금': 'Trading_value',
+                         '등락률': 'Change_pct', '상장시가총액': 'Market_cap'}
             )
             ticker_data = ticker_data.assign(ticker=ticker)
-            ticker_data.index.name = 'date'
+            ticker_data.index.name = 'Date'
             ticker_data_list.append(ticker_data)
             time.sleep(delay)
         data = pd.concat(ticker_data_list)
@@ -166,14 +166,14 @@ class PykrxDataLoader:
         for business_day in tqdm(business_day_list):
             df = stock.get_market_ohlcv(business_day, market=self.market)
             df.reset_index(inplace=True)
-            df["date"] = business_day
+            df["Date"] = business_day
             data = pd.concat([data, df])
             time.sleep(delay)
         data = data.rename(
-            columns={'티커': 'ticker', '날짜': 'date', '시가': 'open', '고가': 'high',
-                     '저가': 'low', '종가': 'close', '거래량': 'volume',
-                     '거래대금': 'trading_value', '등락률': 'change_pct',
-                     '상장시가총액': 'market_cap'}
+            columns={'티커': 'Ticker', '날짜': 'Date', '시가': 'Open', '고가': 'High',
+                     '저가': 'Low', '종가': 'Close', '거래량': 'Volume',
+                     '거래대금': 'Trading_value', '등락률': 'Change_pct',
+                     '상장시가총액': 'Market_cap'}
         )
 
         return data
