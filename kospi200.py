@@ -5,11 +5,26 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
+# 코스피200 클래스 정의
 class Kospi200DataLoader:
     def __init__(self, start_year: str, end_year: str):
         self.start_year = start_year
         self.end_year = end_year
     
+    def get_next_trading_day(date):
+        """
+        입력 날짜가 휴장일이면 다음 영업일까지 반복해서 이동
+        date: 'YYYYMMDD' 문자열
+        """
+        while True:
+            # 삼성전자(005930)의 OHLCV 데이터 확인
+            df = stock.get_market_ohlcv_by_date(date, date, "005930")
+            if not df.empty:
+                return date
+            # 휴장일이면 다음날로 이동
+            dt = datetime.strptime(date, "%Y%m%d") + timedelta(days=1)
+            date = dt.strftime("%Y%m%d")
+
     # 지정한 기간동안의 코스피200 종목의 중복값 제외한 리스트 반환
     def kospi200_list(self):
         # 결과를 저장할 리스트 생성
@@ -32,12 +47,50 @@ class Kospi200DataLoader:
         code_list = code_df['주식코드'].tolist()
 
         return code_list
+
+    def get_market_caps(self, codes):
+        records = []
+        for year in range(self.start_year-1, self.end_year+1):
+            date = f"{year}0401"
+            trading_date = Kospi200DataLoader.get_next_trading_day(date)
+            cap_df = stock.get_market_cap_by_ticker(trading_date)
+            for code in codes["주식코드"]:
+                if code in cap_df.index:
+                    market_cap = cap_df.loc[code, '시가총액']
+                    records.append({
+                        '주식코드': code,
+                        '연도': year,
+                        '날짜': trading_date,
+                        '시가총액': market_cap
+                    })
+                else:
+                    records.append({
+                        '주식코드': code,
+                        '연도': year,
+                        '날짜': trading_date,
+                        '시가총액': None
+                    })
+        df = pd.DataFrame(records)
+        df = df.sort_values(by=['주식코드', '연도']).reset_index(drop=True)
+        # 변화율(%) 계산
+        df['시총변화율'] = df.groupby('주식코드')['시가총액'].pct_change()
+
+        # # 변화량(절대값) 계산
+        # df['시총변화량'] = df.groupby('주식코드')['시가총액'].diff()
+        # 2015년부터의 데이터만 필터링
+        df_filtered = df[df['연도'] >= 2015].reset_index(drop=True)
+        return df_filtered
+
+
+
+
+
     
     # 종목 리스트의 수익률 데이터프레임 반환
-    def kospi200_rtn(self, df):
+    def kospi200_rtn(self, codes):
         records = []
 
-        for code in df['주식코드']:
+        for code in codes['주식코드']:
             df = stock.get_market_ohlcv_by_date(
                 f"{self.start_year}0101", f"{self.end_year}1231", code, freq='y'
             )
